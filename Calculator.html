@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infusion Calculator Suite</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #e6f7ff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        .home-container {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .main-title {
+            color: #2d3436;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin: 50px 0 30px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid #e6f7ff;
+            border-radius: 30px;
+            padding: 20px 45px;
+            font-size: 1.2rem;
+            color: #2d3436;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .calculator-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 50px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e6f7ff;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .search-container {
+            margin: 15px 0;
+        }
+
+        .drug-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e6f7ff;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .drug-item {
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .drug-item:hover {
+            background: #e6f7ff;
+        }
+
+        .ampule-selector {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .result-box {
+            background-color: #f4e7d3;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+        }
+
+        .option-btn, .ampule-btn {
+            padding: 12px 20px;
+            border: 2px solid #e6f7ff;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .active {
+            background-color: #e6f7ff !important;
+            border-color: #90cdf4 !important;
+        }
+
+        .nav-buttons {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .home-btn {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 10px;
+            background-color: #e6f7ff;
+            color: #2c3e50;
+        }
+
+        .disabled-input {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 2rem; }
+            .action-btn { padding: 18px 35px; }
+            .calculator-container { padding: 25px; }
+        }
+
+        @media (max-width: 480px) {
+            .main-title { font-size: 1.75rem; }
+            .action-btn { padding: 16px 30px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Home Page -->
+    <div class="home-container" id="homePage">
+        <h1 class="main-title">Infusion Calculator Suite</h1>
+        <div class="button-group">
+            <button class="action-btn" onclick="showCalculator('ivCalculator')">IV Drip Rate Calculator</button>
+            <button class="action-btn" onclick="showCalculator('medCalculator')">Medication Infusion Calculator</button>
+        </div>
+    </div>
+
+    <!-- IV Drip Calculator -->
+    <div class="calculator-container" id="ivCalculator" style="display: none;">
+        <h1>IV Drip Rate Calculator</h1>
+        <div class="input-group">
+            <label>Volume (ml)</label>
+            <input type="number" id="volume" placeholder="Enter volume in milliliters">
+        </div>
+        <div class="input-group">
+            <label>Duration (hours)</label>
+            <input type="number" id="duration" placeholder="Enter duration in hours">
+        </div>
+        <div class="ampule-selector">
+            <button class="option-btn active" data-value="60" onclick="updateDropFactor(60)">Slow Set (60 drops/ml)</button>
+            <button class="option-btn" data-value="20" onclick="updateDropFactor(20)">IV Line (20 drops/ml)</button>
+        </div>
+        <div class="result-box" id="ivResult" style="display: none;"></div>
+        <div class="nav-buttons">
+            <button class="home-btn" onclick="showPage('homePage')">Home</button>
+        </div>
+    </div>
+
+    <!-- Medication Calculator -->
+    <div class="calculator-container" id="medCalculator" style="display: none;">
+        <h1>Medication Infusion Calculator</h1>
+        <div class="ampule-selector">
+            <button class="option-btn active" onclick="showSection('adult')">Adult</button>
+            <button class="option-btn" onclick="showSection('pediatric')">Pediatric</button>
+        </div>
+
+        <div id="adultSection" style="display: block;">
+            <div class="search-container">
+                <input type="text" id="drugSearch" placeholder="Search medications..." onclick="showDrugList()">
+                <div class="drug-list" id="drugList">
+                    <div class="drug-item" onclick="selectDrug('norepinephrine')">Norepinephrine</div>
+                    <div class="drug-item" onclick="selectDrug('epinephrine')">Epinephrine</div>
+                </div>
+            </div>
+
+            <!-- Norepinephrine Calculator -->
+            <div id="norepinephrine" class="drug-section" style="display: none;">
+                <select class="indication-select" id="indicationSelect" required onchange="enableWeightInput()">
+                    <option value="" disabled selected>Select Clinical Indication</option>
+                    <option value="septicShock" data-min="0.25" data-max="1">Septic Shock (0.25-1 mcg/kg/min)</option>
+                    <option value="cardiogenicShock" data-min="0.05" data-max="0.4">Cardiogenic Shock (0.05-0.4 mcg/kg/min)</option>
+                    <option value="postArrest" data-min="0.05" data-max="1">Post Cardiac Arrest (0.05-1 mcg/kg/min)</option>
+                    <option value="custom">Custom Dose</option>
+                </select>
+
+                <div class="input-group">
+                    <label>Patient Weight (kg)</label>
+                    <input type="number" id="weight" placeholder="Select indication first" 
+                           disabled class="disabled-input" oninput="calculateInfusion()">
+                </div>
+
+                <div class="ampule-selector">
+                    <button class="ampule-btn active" onclick="updateAmpules(1)">1 Ampule (4mg)</button>
+                    <button class="ampule-btn" onclick="updateAmpules(2)">2 Ampules (8mg)</button>
+                </div>
+
+                <div id="customDose" style="display: none;">
+                    <input type="number" id="customDoseInput" step="any" 
+                           placeholder="Enter desired dose (mcg/kg/min)" oninput="calculateInfusion()">
+                </div>
+
+                <div class="result-box" id="medResult" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="home-btn" onclick="showPage('homePage')">Home</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        Developed by Abdelrahman Mohamed
+    </div>
+
+    <script>
+        // Navigation Functions
+        function showPage(pageId) {
+            document.querySelectorAll('.calculator-container, .home-container').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById(pageId).style.display = 'block';
+        }
+
+        function showCalculator(calcId) {
+            showPage(calcId);
+        }
+
+        // IV Drip Calculator Logic
+        let dropFactor = 60;
+        function updateDropFactor(factor) {
+            dropFactor = factor;
+            document.querySelectorAll('#ivCalculator .option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            calculateDripRate();
+        }
+
+        function calculateDripRate() {
+            const volume = parseFloat(document.getElementById('volume').value);
+            const duration = parseFloat(document.getElementById('duration').value);
+            const resultDiv = document.getElementById('ivResult');
+
+            if (!volume || !duration || volume <= 0 || duration <= 0) {
+                resultDiv.style.display = 'none';
+                return;
+            }
+
+            const totalMinutes = duration * 60;
+            const dropsPerMinute = (volume / totalMinutes) * dropFactor;
+            const secondsPerDrop = 60 / dropsPerMinute;
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `One drop every ${secondsPerDrop.toFixed(1)} seconds`;
+        }
+
+        // Medication Calculator Logic
+        let selectedAmpules = 1;
+        function updateAmpules(number) {
+            selectedAmpules = number;
+            document.querySelectorAll('#medCalculator .ampule-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            calculateInfusion();
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('[id$="Section"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById(section + 'Section').style.display = 'block';
+        }
+
+        function showDrugList() {
+            document.getElementById('drugList').style.display = 'block';
+        }
+
+        function selectDrug(drug) {
+            document.getElementById('drugList').style.display = 'none';
+            document.getElementById('drugSearch').value = drug.charAt(0).toUpperCase() + drug.slice(1);
+            document.querySelectorAll('.drug-section').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById(drug).style.display = 'block';
+            calculateInfusion();
+        }
+
+        function enableWeightInput() {
+            const indication = document.getElementById('indicationSelect');
+            const weightInput = document.getElementById('weight');
+            const customDoseDiv = document.getElementById('customDose');
+            
+            if (indication.value === 'custom') {
+                weightInput.disabled = false;
+                weightInput.placeholder = "Enter weight in kg";
+                customDoseDiv.style.display = 'block';
+                weightInput.classList.remove('disabled-input');
+            } else if (indication.value) {
+                weightInput.disabled = false;
+                weightInput.placeholder = "Enter weight in kg";
+                customDoseDiv.style.display = 'none';
+                weightInput.classList.remove('disabled-input');
+            } else {
+                weightInput.disabled = true;
+                weightInput.placeholder = "Select indication first";
+                weightInput.classList.add('disabled-input');
+            }
+            calculateInfusion();
+        }
+
+        function calculateInfusion() {
+            const indicationSelect = document.getElementById('indicationSelect');
+            const selectedOption = indicationSelect.options[indicationSelect.selectedIndex];
+            const weight = parseFloat(document.getElementById('weight').value);
+            const resultDiv = document.getElementById('medResult');
+
+            if (!indicationSelect.value || !weight || weight <= 0) {
+                resultDiv.style.display = 'none';
+                return;
+            }
+
+            const concentration = (selectedAmpules * 4 * 1000) / 50; // mcg/mL
+            let minRate, maxRate;
+
+            if (selectedOption.value === 'custom') {
+                const customDose = parseFloat(document.getElementById('customDoseInput').value) || 0;
+                minRate = maxRate = (customDose * weight * 60) / concentration;
+            } else {
+                const minDose = parseFloat(selectedOption.dataset.min);
+                const maxDose = parseFloat(selectedOption.dataset.max);
+                minRate = (minDose * weight * 60) / concentration;
+                maxRate = (maxDose * weight * 60) / concentration;
+            }
+
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `
+                <h3>Infusion Rate:</h3>
+                ${selectedOption.value === 'custom' ? 
+                    `${maxRate.toFixed(1)} mL/hr` : 
+                    `${minRate.toFixed(1)} - ${maxRate.toFixed(1)} mL/hr`}
+                <p>Concentration: ${concentration.toFixed(1)} mcg/mL</p>
+                <p>Preparation: ${selectedAmpules} ampule(s) in 50mL syringe</p>
+                ${selectedOption.value === 'custom' ? 
+                    `<p>Custom Dose: ${document.getElementById('customDoseInput').value} mcg/kg/min</p>` : 
+                    `<p>Selected Indication: ${selectedOption.textContent}</p>`}
+            `;
+        }
+
+        // Event Listeners for Real-time Updates
+        document.getElementById('volume').addEventListener('input', calculateDripRate);
+        document.getElementById('duration').addEventListener('input', calculateDripRate);
+        document.getElementById('weight').addEventListener('input', calculateInfusion);
+        document.getElementById('customDoseInput').addEventListener('input', calculateInfusion);
+
+        // Initialize default states
+        document.querySelectorAll('.option-btn')[0].classList.add('active');
+    </script>
+</body>
+</html>
